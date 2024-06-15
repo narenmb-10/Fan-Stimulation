@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fan</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .main {
+            text-align: center;
+        }
+
+        #img {
+            width: 300px;
+            transition: transform 0.1s linear;
+        }
+
+        .rotate {
+            animation: spin infinite linear;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        button {
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 5px;
+            cursor: pointer;
+            border-radius: 10%;
+            outline: none;
+        }
+
+        .on {
+            background-color: green;
+        }
+
+        .off {
+            background-color: red;
+        }
+
+        .speed {
+            background-color: gray;
+        }
+
+        .speed:hover {
+            background-color: darkgray;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <img id="img" src="fan.png" alt="Fan Image"> <br> <br>
+        <button class="on" onclick="myfunon()">ON</button>
+        <button class="off" onclick="myfunoff()">OFF</button>
+        <button class="speed" onclick="myfun1()">1</button>
+        <button class="speed" onclick="myfun2()">2</button>
+        <button class="speed" onclick="myfun3()">3</button>
+    </div>
+
+    <audio id="soundOn" src="on.mp3"></audio>
+    <audio id="soundOff" src="off.mp3"></audio>
+    <audio id="soundSpeed1" src="speed.mp3" loop></audio>
+    <audio id="soundSpeed2" src="speed.mp3" loop></audio>
+    <audio id="soundSpeed3" src="speed.mp3" loop></audio>
+
+    <script>
+        let fan = document.getElementById('img');
+        let speed = 0;
+        let intervalId;
+        let currentSpeedSound;
+        let soundOn = document.getElementById('soundOn');
+        let soundOff = document.getElementById('soundOff');
+        let soundSpeed1 = document.getElementById('soundSpeed1');
+        let soundSpeed2 = document.getElementById('soundSpeed2');
+        let soundSpeed3 = document.getElementById('soundSpeed3');
+
+        function setFanSpeed(newSpeed) {
+            speed = newSpeed;
+            if (speed === 0) {
+                fan.style.animationDuration = '';
+                fan.classList.remove('rotate');
+            } else {
+                fan.style.animationDuration = (1 / speed) + 's';
+                fan.classList.add('rotate');
+            }
+        }
+
+        function playSound(id, playbackRate = 1) {
+            let sound = document.getElementById(id);
+            sound.currentTime = 0;
+            sound.playbackRate = playbackRate;
+            sound.play();
+        }
+
+        function stopCurrentSpeedSound() {
+            if (currentSpeedSound) {
+                currentSpeedSound.pause();
+                currentSpeedSound.currentTime = 0;
+            }
+        }
+
+        function startSpeedSound() {
+            if (speed === 1) {
+                currentSpeedSound = soundSpeed1;
+            } else if (speed === 2) {
+                currentSpeedSound = soundSpeed2;
+            } else if (speed === 3) {
+                currentSpeedSound = soundSpeed3;
+            }
+            if (currentSpeedSound) {
+                currentSpeedSound.play();
+            }
+        }
+
+        function myfunon() {
+            stopCurrentSpeedSound();
+            playSound('soundOn');
+            soundOn.onended = function() {
+                if (speed === 0) {
+                    setFanSpeed(1);
+                    startSpeedSound();
+                }
+            };
+        }
+
+        function myfunoff() {
+            stopCurrentSpeedSound();
+            playSound('soundOff');
+            clearInterval(intervalId);
+            intervalId = setInterval(() => {
+                if (speed > 0) {
+                    speed -= 0.1;
+                    if (speed < 0.1) speed = 0;
+                    setFanSpeed(speed);
+                } else {
+                    clearInterval(intervalId);
+                }
+            }, 100);
+        }
+
+        function myfun1() {
+            clearInterval(intervalId);
+            setFanSpeed(1);
+            stopCurrentSpeedSound();
+            startSpeedSound();
+        }
+
+        function myfun2() {
+            clearInterval(intervalId);
+            setFanSpeed(2);
+            stopCurrentSpeedSound();
+            startSpeedSound();
+        }
+
+        function myfun3() {
+            clearInterval(intervalId);
+            setFanSpeed(3);
+            stopCurrentSpeedSound();
+            startSpeedSound();
+        }
+    </script>
+</body>
+</html>
